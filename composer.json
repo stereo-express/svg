@@ -1,0 +1,15 @@
+{
+    "name": "stereo-express/svg",
+    "description": "Make .svg files in svg/ directory of each extension available as tokens.",
+    "type": "drupal-custom-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Marc-Olivier Fortin",
+            "email": "info@marcolivierfortin.com"
+        }
+    ],
+    "require": {
+        "ext-dom": "*"
+    }
+}

@@ -1,0 +1,44 @@
+# $Id$
+#
+# French translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  svg.module: n/a
+#  svg.info.yml: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2022-12-29 13:44-0500\n"
+"PO-Revision-Date: 2022-12-29 13:44-0500\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: French <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: svg.module:63
+msgid "Render of %file file."
+msgstr "Rendu du fichier %file."
+
+#: svg.module:78 svg.info.yml:0
+msgid "Scalable Vector Graphics"
+msgstr "Scalable Vector Graphics"
+
+#: svg.module:79
+msgid "Tokens for every .svg files in the svg/ directory of every extension."
+msgstr ""
+"Jetons pour chacun des fichiers .svg dans le répertoire svg/ de "
+"chaque extension."
+
+#: svg.info.yml:0
+msgid "Make .svg files in svg/ directory of each extension available as tokens."
+msgstr ""
+"Rend les fichiers .svg dans le répertoire svg/ de chaque extension "
+"disponible en tant que jetons."
+
+#: svg.info.yml:0
+msgid "Stereo Express"
+msgstr "Stereo Express"

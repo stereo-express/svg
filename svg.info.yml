@@ -1,0 +1,7 @@
+type: module
+name: 'Scalable Vector Graphics'
+description: 'Make .svg files in svg/ directory of each extension available as tokens.'
+package: 'Stereo Express'
+
+core_version_requirement: ^9.0 || ^10.0
+php: 8.1

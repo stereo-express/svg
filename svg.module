@@ -1,0 +1,154 @@
+<?php
+
+/**
+ * @file
+ * Contains svg.module.
+ *
+ * To generate a svg:
+ *
+ * - Go to this site: https://vectorpaint.yaks.co.nz/
+ *   - Import your svg file.
+ *   - Click on "fit to content" option on the canvas.
+ *   - Export your svg file.
+ *
+ * - Go to this site: https://jakearchibald.github.io/svgomg/
+ *   - Import your svg file.
+ *   - Click on all options except the "multi pass" option.
+ *   - Export your svg file.
+ *
+ * - Paste the content of this file in the svg/ directory of a Drupal extension.
+ *
+ * The filename will be available as a token with the following pattern:
+ * [svg:your-extension-type:your-extension:your-file-name] without the ".svg"
+ * extension.
+ */
+
+use Drupal\Core\Extension\ExtensionList;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\Markup;
+
+/**
+ * Implements hook_token_info().
+ *
+ * @see hook_token_info()
+ *
+ * @noinspection PhpUnused
+ */
+function svg_token_info(): array {
+  $svg = [];
+
+  $extensionTypes = ['module', 'profile', 'theme'];
+
+  foreach ($extensionTypes as $extensionType) {
+    /** @var ExtensionList $extensionManager */
+    $extensionManager = Drupal::service('extension.list.' . $extensionType);
+
+    $installedExtensions = $extensionManager->getAllInstalledInfo();
+
+    foreach ($installedExtensions as $extensionMachineName => $extensionInfo) {
+      $extensionPath = $extensionManager->getPath($extensionMachineName);
+
+      // If the extension has a svg/ directory.
+      if (file_exists($extensionPath . '/svg/')) {
+        // Get all svg file names that match the pattern.
+        $files = glob($extensionPath . '/svg/*.svg');
+
+        foreach ($files as $file) {
+          preg_match('/.+\/svg\/(?<name>[a-z-]*)\.svg/', $file, $info);
+
+          // Declare the token for each svg file.
+          $svg[$extensionType . ':' . $extensionMachineName . ':' . $info['name']] = [
+            'name' => $info['name'],
+            'description' => t('Render of %file file.', ['%file' => $file]),
+          ];
+
+          // Remove profile tokens listed as module tokens to prevent duplicates.
+          if ($extensionType === 'profile') {
+            unset($svg['module:' . $extensionMachineName . ':' . $info['name']]);
+          }
+        }
+      }
+    }
+  }
+
+  return [
+    'types' => [
+      'svg' => [
+        'name' => t('Scalable Vector Graphics'),
+        'description' => t('Tokens for every .svg files in the svg/ directory of every extension.'),
+      ],
+    ],
+    'tokens' => [
+      'svg' => $svg,
+    ],
+  ];
+}
+
+/**
+ * Implements hook_tokens().
+ *
+ * @see hook_tokens()
+ *
+ * @noinspection PhpUnused
+ * @noinspection PhpUnusedParameterInspection
+ */
+function svg_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata): array {
+  $replacements = [];
+
+  if ($type === 'svg') {
+    // Allowed extension types.
+    $extensionTypes = ['module', 'profile', 'theme'];
+
+    foreach ($tokens as $name => $original) {
+      $parts = explode(':', $name);
+
+      // If token has 3 parts (one for the extension type, one for the extension
+      // machine name and one for the file name).
+      if (count($parts) > 2 && in_array($parts[0], $extensionTypes)) {
+        /** @var ExtensionList $extensions */
+        $extensionManager = Drupal::service('extension.list.' . $parts[0]);
+
+        // The extension path.
+        $extensionPath = $extensionManager->getPath($parts[1]);
+
+        // The complete file path.
+        $filePath = $extensionPath . '/svg/' . $parts[2] . '.svg';
+
+        // If the file really exists.
+        if (file_exists($filePath)) {
+          $svgContent = file_get_contents($filePath);
+
+          // If there are more parts on the token, and they are on pairs.
+          if ((count($parts) - 3) % 2 === 0) {
+            // Chunk extra part in pair chunks.
+            $attributes = array_chunk(array_slice($parts, 3), 2);
+
+            // Create a new DOM document.
+            $document = new DOMDocument();
+
+            // Load the svg file.
+            $document->loadXml($svgContent);
+
+            // Create a new XPath document
+            $documentXPath = new DOMXPath($document);
+
+            foreach ($documentXPath->query('/*[name()=\'svg\']') as $svgElement) {
+              // Add each attribute with its name and its value.
+              foreach ($attributes as $attribute) {
+                $svgElement->setAttribute($attribute[0], $attribute[1]);
+              }
+            }
+
+            // Replace the svg content with the new ont with attributes.
+            $svgContent = $document->saveHtml();
+          }
+
+          // Make the svg content render-able by the token.
+          $replacements[$original] = Markup::create($svgContent);
+        }
+      }
+    }
+  }
+
+  return $replacements;
+}
